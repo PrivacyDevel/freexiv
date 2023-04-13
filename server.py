@@ -5,6 +5,7 @@ import urllib.parse
 import bottle
 
 import api
+import config
 
 def render_header():
     return '<form action="/search"><input name="q"><input type="submit" value="search"></form>'
@@ -108,4 +109,4 @@ def search():
     html += render_illusts(illusts)
     return html
 
-bottle.run(host='0.0.0.0')
+bottle.run(host=config.BIND_ADDRESS, server=config.SERVER)
