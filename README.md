@@ -4,7 +4,7 @@
 
 ### Debian based systems
 ```
-sudo apt install --no-install-recommends git python3-{pybottle,waitress,requests}
+sudo apt install --no-install-recommends git python3-{bottle,waitress,requests}
 git clone https://codeberg.org/PrivacyDev/freexiv
 ```
 Now copy the file config.py.example into config.py and adjust as needed.
