@@ -22,7 +22,10 @@ def render_illusts(illusts):
 
 @bottle.get('/')
 def landing():
-    return render_header()
+    html = render_header()
+    landing_page = api.fetch_landing_page().json()
+    html += render_illusts(landing_page['body']['thumbnails']['illust'])
+    return html
 
 @bottle.get('/en/artworks/<illust_id:int>')
 def artworks(illust_id):
