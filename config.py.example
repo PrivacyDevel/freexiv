@@ -1,0 +1,10 @@
+######################
+# CONFIG
+######################
+
+SESSION_ID = 'XXXXXXXX_XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX'
+PROXIES = {
+#   'https': 'socks5://localhost:8888'
+}
+
+######################
