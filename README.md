@@ -4,18 +4,39 @@
 
 ### Debian based systems
 ```
-sudo apt install --no-install-recommends git python3-{bottle,waitress,requests}
+sudo -i
+apt install --no-install-recommends git nginx-core python3-{bottle,waitress,requests}
+useradd -ms /bin/bash freexiv
+su - freexiv
 git clone https://codeberg.org/PrivacyDev/freexiv
+cp freexiv/config.py{.example,}
+exit
+cp /home/freexiv/freexiv/nginx/freexiv /etc/nginx/sites-available/
+ln -s /etc/nginx/sites-{available,enabled}/freexiv
+cp /home/freexiv/freexiv/freexiv.service /etc/systemd/system/
 ```
-Now copy the file config.py.example into config.py and adjust as needed.
-
-## Run
-
-`./server.py`
+Adjust the following files as needed:
+- /home/freexiv/freexiv/config.py
+- /etc/nginx/sites-available/freexiv
+- /etc/systemd/system/freexiv.service
+```
+systemctl daemon-reload
+systemctl enable --now freexiv
+systemctl reload nginx
+exit
+```
 
 ## Update
 
-`git pull` and restart the server
+```
+sudo -i
+su - freexiv
+cd freexiv
+git pull
+exit
+systemctl restart freexiv
+exit
+```
 
 ## Instances
 
