@@ -19,6 +19,11 @@ Adjust the following files as needed:
 - /home/freexiv/freexiv/config.py
 - /etc/nginx/sites-available/freexiv
 - /etc/systemd/system/freexiv.service
+
+Add the following line inside of the http block in `/etc/nginx/nginx.conf`:
+
+`proxy_cache_path /var/cache/nginx levels=1:2 keys_zone=my_zone:10m max_size=5g use_temp_path=off;`
+
 ```
 systemctl daemon-reload
 systemctl enable --now freexiv
