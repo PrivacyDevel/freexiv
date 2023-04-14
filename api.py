@@ -5,28 +5,11 @@ import requests
 import config
 
 
-class ForbiddenProxyDestException(Exception):
-    def __init__(self, netloc):
-        super().__init__(netloc)
-
 def gen_auth_headers():
     return {
         'Cookie': f'PHPSESSID={config.SESSION_ID}',
         'User-Agent': 'Mozilla/5.0'
     }
-
-def fetch_pximg(url):
-
-    netloc = urllib.parse.urlsplit(url).netloc
-    if not netloc in ['s.pximg.net', 'i.pximg.net']:
-        raise ForbiddenProxyDestException(netloc)
-
-    headers = {
-            'Referer': 'https://www.pixiv.net/'
-    }
-    resp = requests.get(url, headers=headers)
-    resp.raise_for_status()
-    return resp
 
 def fetch_illust_pages(illust_id):
     url = f'https://www.pixiv.net/ajax/illust/{illust_id}/pages'

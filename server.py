@@ -14,8 +14,8 @@ def render_illusts(illusts):
     html = ''
     for illust in illusts:
         try:
-            url_encoded = urllib.parse.quote(illust['url'])
-            html += f"<a href='/en/artworks/{illust['id']}'><img src='/pximg/{url_encoded}'></a>"
+            url = urllib.parse.urlsplit(illust['url'])
+            html += f"<a href='/en/artworks/{illust['id']}'><img src='/{url.netloc}{url.path}'></a>"
         except KeyError:
             pass
     return html
@@ -34,12 +34,12 @@ def artworks(illust_id):
     for page in pages['body']:
 
         regular_url = page['urls']['small']
-        regular_url_encoded = urllib.parse.quote(regular_url)
+        regular_url_split = urllib.parse.urlsplit(regular_url)
 
         original_url = page['urls']['original']
-        original_url_encoded = urllib.parse.quote(original_url)
+        original_url_split = urllib.parse.urlsplit(original_url)
 
-        html += f'<a href="/pximg/{original_url_encoded}"><img src="/pximg/{regular_url_encoded}"></a>'
+        html += f'<a href="/{original_url_split.netloc}/{original_url_split.path}"><img src="/{regular_url_split.netloc}/{regular_url_split.path}"></a>'
 
     illust = api.fetch_illust(illust_id).json()['body']
     html += f"<h1>{illust['illustTitle']}</h1>"
@@ -50,8 +50,8 @@ def artworks(illust_id):
     comments = api.fetch_comments(illust_id).json()
     for comment in comments['body']['comments']:
         img = comment['img']
-        img_encoded = urllib.parse.quote(img)
-        html += f"<div><a href='/en/users/{comment['userId']}'><img src='/pximg/{img_encoded}'>{comment['userName']}</a>: {comment['comment']}</div>"
+        img_split = urllib.parse.urlsplit(img)
+        html += f"<div><a href='/en/users/{comment['userId']}'><img src='/{img_split.netloc}/{img_split.path}'>{comment['userName']}</a>: {comment['comment']}</div>"
 
     recommends = api.fetch_illust_recommends(illust_id).json()
     html += "<h2>Recommended</h2>"
@@ -77,8 +77,8 @@ def users(user_id):
     if len(illusts) > 0:
         for illust_id, illust in illusts.items():
             image_url = illust['profileImageUrl']
-            image_encoded = urllib.parse.quote(image_url)
-            html += f"<img src='/pximg/{image_encoded}'>"
+            image_split = urllib.parse.urlsplit(image_url)
+            html += f"<img src='/{image_split.netloc}{image_split.path}'>"
             break
 
     html += f"{ogp['title']}<p>{ogp['description']}</p>"
@@ -86,15 +86,9 @@ def users(user_id):
     if len(illusts) > 0:
         for illust_id, illust in illusts.items():
             url = illust['url']
-            url_encoded = urllib.parse.quote(url)
-            html += f"<a href='/en/artworks/{illust_id}'><img src='/pximg/{url_encoded}'</a>"
+            url_split = urllib.parse.urlsplit(url)
+            html += f"<a href='/en/artworks/{illust_id}'><img src='/{url_split.netloc}/{url_split.path}'</a>"
     return html
-
-@bottle.get('/pximg/<path:path>')
-def pximg(path):
-    resp = api.fetch_pximg(urllib.parse.unquote(path))
-    bottle.response.set_header('content-type', resp.headers.get('content-type'))
-    return resp.content
 
 @bottle.get('/user_banner/<user_id:int>')
 def user_banner(user_id):
@@ -112,4 +106,4 @@ def search():
     html += render_illusts(illusts)
     return html
 
-bottle.run(host=config.BIND_ADDRESS, server=config.SERVER)
+bottle.run(host=config.BIND_ADDRESS, server=config.SERVER, port=config.BIND_PORT)
