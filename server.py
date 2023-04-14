@@ -39,7 +39,7 @@ def artworks(illust_id):
         original_url = page['urls']['original']
         original_url_split = urllib.parse.urlsplit(original_url)
 
-        html += f'<a href="/{original_url_split.netloc}/{original_url_split.path}"><img src="/{regular_url_split.netloc}/{regular_url_split.path}"></a>'
+        html += f'<a href="/{original_url_split.netloc}{original_url_split.path}"><img src="/{regular_url_split.netloc}{regular_url_split.path}"></a>'
 
     illust = api.fetch_illust(illust_id).json()['body']
     html += f"<h1>{illust['illustTitle']}</h1>"
@@ -51,7 +51,7 @@ def artworks(illust_id):
     for comment in comments['body']['comments']:
         img = comment['img']
         img_split = urllib.parse.urlsplit(img)
-        html += f"<div><a href='/en/users/{comment['userId']}'><img src='/{img_split.netloc}/{img_split.path}'>{comment['userName']}</a>: {comment['comment']}</div>"
+        html += f"<div><a href='/en/users/{comment['userId']}'><img src='/{img_split.netloc}{img_split.path}'>{comment['userName']}</a>: {comment['comment']}</div>"
 
     recommends = api.fetch_illust_recommends(illust_id).json()
     html += "<h2>Recommended</h2>"
@@ -87,7 +87,7 @@ def users(user_id):
         for illust_id, illust in illusts.items():
             url = illust['url']
             url_split = urllib.parse.urlsplit(url)
-            html += f"<a href='/en/artworks/{illust_id}'><img src='/{url_split.netloc}/{url_split.path}'</a>"
+            html += f"<a href='/en/artworks/{illust_id}'><img src='/{url_split.netloc}{url_split.path}'</a>"
     return html
 
 @bottle.get('/user_banner/<user_id:int>')
