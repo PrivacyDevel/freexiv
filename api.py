@@ -42,7 +42,7 @@ def fetch_user_all(user_id):
     return resp
 
 
-def fetch_illust_recommends(illust_id, limit=18):
+def fetch_illust_recommends(illust_id, limit=36):
     url = f'https://www.pixiv.net/ajax/illust/{illust_id}/recommend/init?limit={limit}'
     resp = requests.get(url, headers=gen_auth_headers(), proxies=config.PROXIES)
     resp.raise_for_status()

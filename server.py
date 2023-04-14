@@ -33,7 +33,7 @@ def artworks(illust_id):
     pages = api.fetch_illust_pages(illust_id).json()
     for page in pages['body']:
 
-        regular_url = page['urls']['small']
+        regular_url = page['urls']['regular']
         regular_url_split = urllib.parse.urlsplit(regular_url)
 
         original_url = page['urls']['original']
