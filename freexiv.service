@@ -1,0 +1,11 @@
+[Service]
+User=freexiv
+Group=freexiv
+WorkingDirectory=/home/freexiv/freexiv
+ExecStart=/home/freexiv/freexiv/server.py
+Restart=always
+RestartSec=3
+
+[Install]
+WantedBy=multi-user.target
+
