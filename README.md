@@ -55,6 +55,9 @@ exit
 |--------------------------------------------------------------------------------------------------------------------------------------------------------|-------------------|
 |[freexiv.g4c3eya4clenolymqbpgwz3q3tawoxw56yhzk4vugqrl6dtu3ejvhjid.onion](http://freexiv.g4c3eya4clenolymqbpgwz3q3tawoxw56yhzk4vugqrl6dtu3ejvhjid.onion) | official instance |
 
+## Mirrors
+[Codeberg](https://codeberg.org/PrivacyDev/freexiv), [GitHub](https://github.com/PrivacyDevel/freexiv)
+
 ## Donations
 [Monero (XMR)](https://www.getmonero.org/): `83Ak3unX8ATdAQzWhKWzoDUUQRZX28NZN66r8CoEUEAZZsjxeEJxqfTdYjv6n7m7JkCGvHeKLQffQXNzobaJw4hEQw92rpP`
 
