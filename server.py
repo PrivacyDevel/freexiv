@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import urllib.parse
+import math
 
 import bottle
 
@@ -8,23 +9,38 @@ import api
 import config
 
 def render_header():
-    return '<form action="/search"><input name="q"><input type="submit" value="search"></form>'
+    html = '<style>details[open] > summary {display: none;}</style>'
+    html += '<a href="/"><h1>freexiv</h1></a><form action="/search"><input name="q"><input type="submit" value="search"></form>'
+    return html
 
 def render_illusts(illusts):
     html = ''
     for illust in illusts:
         try:
             url = urllib.parse.urlsplit(illust['url'])
-            html += f"<a href='/en/artworks/{illust['id']}'><img src='/{url.netloc}{url.path}'></a>"
+            html += f"<a href='/en/artworks/{illust['id']}'><img src='/{url.netloc}{url.path}' loading='lazy' ></a>"
         except KeyError:
             pass
+
     return html
+
+def render_paged_illusts(illusts):
+    num_of_pages = math.ceil(len(illusts) / api.RECOMMENDS_PAGE_SIZE)
+    html = render_illusts(illusts[:api.RECOMMENDS_PAGE_SIZE])
+    for page in range(1, num_of_pages):
+        html += '<details><summary>load more</summary><p>'
+        html += render_illusts(illusts[page * api.RECOMMENDS_PAGE_SIZE: page * api.RECOMMENDS_PAGE_SIZE + api.RECOMMENDS_PAGE_SIZE])
+
+    for page in range(num_of_pages):
+        html += '</p></details>'
+    return html
+
 
 @bottle.get('/')
 def landing():
     html = render_header()
     landing_page = api.fetch_landing_page().json()
-    html += render_illusts(landing_page['body']['thumbnails']['illust'])
+    html += render_paged_illusts(landing_page['body']['thumbnails']['illust'])
     return html
 
 @bottle.get('/en/artworks/<illust_id:int>')
@@ -53,9 +69,9 @@ def artworks(illust_id):
         img_split = urllib.parse.urlsplit(img)
         html += f"<div><a href='/en/users/{comment['userId']}'><img src='/{img_split.netloc}{img_split.path}'>{comment['userName']}</a>: {comment['comment']}</div>"
 
-    recommends = api.fetch_illust_recommends(illust_id).json()
+    recommends = api.fetch_illust_recommends_init(illust_id, api.MAX_RECOMMENDS_PAGE_SIZE).json()
     html += "<h2>Recommended</h2>"
-    html += render_illusts(recommends['body']['illusts'])
+    html += render_paged_illusts(recommends['body']['illusts'])
 
     return html
 
