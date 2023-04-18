@@ -13,7 +13,7 @@ def render_header():
     html += '<a href="/"><h1>freexiv</h1></a><form action="/search"><input name="q"><input type="submit" value="search"></form>'
     return html
 
-def render_illusts(illusts):
+def render_illusts_general(illusts):
     html = ''
     for illust in illusts:
         try:
@@ -24,12 +24,20 @@ def render_illusts(illusts):
 
     return html
 
-def render_paged_illusts(illusts):
+def render_illusts_user(illusts):
+    html = ''
+    for illust_id, illust in illusts:
+        url = illust['url']
+        url_split = urllib.parse.urlsplit(url)
+        html += f"<a href='/en/artworks/{illust_id}'><img src='/{url_split.netloc}{url_split.path}'></a>"
+    return html
+
+def render_paged_illusts(illusts, render_fun=render_illusts_general):
     num_of_pages = math.ceil(len(illusts) / api.RECOMMENDS_PAGE_SIZE)
-    html = render_illusts(illusts[:api.RECOMMENDS_PAGE_SIZE])
+    html = render_fun(illusts[:api.RECOMMENDS_PAGE_SIZE])
     for page in range(1, num_of_pages):
         html += '<details><summary>load more</summary><p>'
-        html += render_illusts(illusts[page * api.RECOMMENDS_PAGE_SIZE: page * api.RECOMMENDS_PAGE_SIZE + api.RECOMMENDS_PAGE_SIZE])
+        html += render_fun(illusts[page * api.RECOMMENDS_PAGE_SIZE: page * api.RECOMMENDS_PAGE_SIZE + api.RECOMMENDS_PAGE_SIZE])
 
     for page in range(num_of_pages):
         html += '</p></details>'
@@ -79,14 +87,9 @@ def artworks(illust_id):
 def users(user_id):
     html = render_header()
 
-#    user = api.fetch_user_top(user_id).json()
-#    ogp = user['body']['extraData']['meta']['ogp']
-#    banner_image = ogp['image']
-#    banner_image_query = urllib.parse.urlsplit(banner_image).query
-#    banner_image_id = urllib.parse.parse_qs(banner_image_query)['id'][0]
-#    return f"<img src='/profile_pic/{banner_image_id}'>{ogp['title']}<p>{ogp['description']}</p>"
-
     user = api.fetch_user_top(user_id).json()
+    user_all = api.fetch_user_all(user_id).json()
+
     ogp = user['body']['extraData']['meta']['ogp']
     illusts = user['body']['illusts']
 
@@ -100,10 +103,15 @@ def users(user_id):
     html += f"{ogp['title']}<p>{ogp['description']}</p>"
 
     if len(illusts) > 0:
-        for illust_id, illust in illusts.items():
-            url = illust['url']
-            url_split = urllib.parse.urlsplit(url)
-            html += f"<a href='/en/artworks/{illust_id}'><img src='/{url_split.netloc}{url_split.path}'</a>"
+        if len(illusts.items()) == len(user_all['body']['illusts'].items()):
+            html += render_paged_illusts(list(illusts.items()), render_illusts_user)
+        else:
+            illust_ids = list(user_all['body']['illusts'].keys())
+            max_num_of_ids_per_page = 100
+            illusts = {}
+            for page in range(math.ceil(len(illust_ids) / max_num_of_ids_per_page)):
+                illusts |= api.fetch_user_illusts(user_id, illust_ids[page * max_num_of_ids_per_page: page * max_num_of_ids_per_page + max_num_of_ids_per_page]).json()
+            html += render_paged_illusts(list(illusts['body']['works'].items()), render_illusts_user)
     return html
 
 @bottle.get('/user_banner/<user_id:int>')
@@ -119,7 +127,7 @@ def search():
     search_term_encoded = urllib.parse.quote(search_term)
     search_results = api.fetch_search_results(search_term).json()
     illusts = search_results['body']['illustManga']['data']
-    html += render_illusts(illusts)
+    html += render_paged_illusts(illusts)
     return html
 
 bottle.run(host=config.BIND_ADDRESS, server=config.SERVER, port=config.BIND_PORT)

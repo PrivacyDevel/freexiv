@@ -44,6 +44,18 @@ def fetch_user_all(user_id):
     resp.raise_for_status()
     return resp
 
+def fetch_user_illusts(user_id, illust_ids):
+    url = f'https://www.pixiv.net/ajax/user/{user_id}/profile/illusts'
+
+    params = '?work_category=illustManga&is_first_page=0'
+    for illust_id in illust_ids:
+        params += '&ids[]=' + illust_id
+
+    resp = requests.get(url + params, headers=gen_auth_headers(), proxies=config.PROXIES) # auth and proxy needed?
+    resp.raise_for_status()
+    return resp
+
+
 
 def fetch_illust_recommends_init(illust_id, limit=RECOMMENDS_PAGE_SIZE):
     url = f'https://www.pixiv.net/ajax/illust/{illust_id}/recommend/init?limit={limit}'
@@ -53,7 +65,7 @@ def fetch_illust_recommends_init(illust_id, limit=RECOMMENDS_PAGE_SIZE):
 
 #def fetch_illust_recommends_next(ids):
 #    url = f'https://www.pixiv.net/ajax/illust/recommend/'
-#    resp = requests.get(url, headers=gen_auth_headers(), proxies=config.PROXIES) # needed?
+#    resp = requests.get(url, headers=gen_auth_headers(), proxies=config.PROXIES) # auth and proxy needed??
 #    resp.raise_for_status()
 #    return resp
 
