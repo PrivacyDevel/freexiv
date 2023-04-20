@@ -75,7 +75,14 @@ def artworks(illust_id):
     for comment in comments['body']['comments']:
         img = comment['img']
         img_split = urllib.parse.urlsplit(img)
-        html += f"<div><a href='/en/users/{comment['userId']}'><img src='/{img_split.netloc}{img_split.path}'>{comment['userName']}</a>: {comment['comment']}</div>"
+        html += f"<div><a href='/en/users/{comment['userId']}'><img src='/{img_split.netloc}{img_split.path}'>{comment['userName']}</a>: "
+        if len(comment['comment']) != 0:
+            html += f"{comment['comment']}"
+        else:
+            html += f"<img src='/s.pximg.net/common/images/stamp/generated-stamps/{comment['stampId']}_s.jpg'>"
+
+        html += "</div>"
+
 
     recommends = api.fetch_illust_recommends_init(illust_id, api.MAX_RECOMMENDS_PAGE_SIZE).json()
     html += "<h2>Recommended</h2>"
