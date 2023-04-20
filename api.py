@@ -44,6 +44,12 @@ def fetch_user_all(user_id):
     resp.raise_for_status()
     return resp
 
+def fetch_user_bookmarks(user_id, offset=0, limit=48):
+    url = f'https://www.pixiv.net/ajax/user/{user_id}/illusts/bookmarks?offset={offset}&limit={limit}&rest=show&tag='
+    resp = requests.get(url, headers=gen_auth_headers(), proxies=config.PROXIES)
+    resp.raise_for_status()
+    return resp
+
 def fetch_user_illusts(user_id, illust_ids):
     url = f'https://www.pixiv.net/ajax/user/{user_id}/profile/illusts'
 

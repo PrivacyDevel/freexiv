@@ -50,6 +50,46 @@ def render_paged_illusts(illusts, render_fun=render_illusts_general):
         html += '</p></details>'
     return html
 
+def render_user_header(user_id, user_top):
+    html = render_header()
+
+    ogp = user_top['body']['extraData']['meta']['ogp']
+    illusts = user_top['body']['illusts']
+
+    if len(illusts) > 0:
+        for illust_id, illust in illusts.items():
+            image_url = illust['profileImageUrl']
+            image_split = urllib.parse.urlsplit(image_url)
+            html += f"<img src='/{image_split.netloc}{image_split.path}'>"
+            break
+
+    html += f"{ogp['title']}<p>{ogp['description']}</p>"
+    html += f'<ul><li><a href="/en/users/{user_id}">Home</a></li><li><a href="/en/users/{user_id}/bookmarks/artworks">Bookmarks</a></li></ul>'
+    return html
+
+def render_pager(p, max_p):
+    html = '<div>'
+
+    if p > 1:
+        html += '<a href="?p=1"><<</a> '
+        html += f'<a href="?p={p - 1}"><</a> '
+
+    lowest = max(p - 3, 1)
+    highest = min(lowest + 6, max_p)
+    if max_p > 6 and highest - lowest < 6:
+        lowest = highest - 6
+
+    for i in range(highest - lowest + 1):
+        cur = lowest + i
+        html += f'<a href="?p={cur}">{cur}</a> '
+
+    if p < max_p:
+        html += f'<a href="?p={p + 1}">></a> '
+        html += f'<a href="?p={max_p}">>></a>'
+    html += '</div>'
+    return html
+
+
 
 @bottle.get('/')
 def landing():
@@ -107,23 +147,14 @@ def artworks(illust_id):
     return html
 
 @bottle.get('/en/users/<user_id:int>')
-def users(user_id):
-    html = render_header()
+def user(user_id):
 
-    user = api.fetch_user_top(user_id).json()
+    user_top = api.fetch_user_top(user_id).json()
     user_all = api.fetch_user_all(user_id).json()
 
-    ogp = user['body']['extraData']['meta']['ogp']
-    illusts = user['body']['illusts']
+    html = render_user_header(user_id, user_top)
 
-    if len(illusts) > 0:
-        for illust_id, illust in illusts.items():
-            image_url = illust['profileImageUrl']
-            image_split = urllib.parse.urlsplit(image_url)
-            html += f"<img src='/{image_split.netloc}{image_split.path}'>"
-            break
-
-    html += f"{ogp['title']}<p>{ogp['description']}</p>"
+    illusts = user_top['body']['illusts']
 
     if len(illusts) > 0:
         if len(illusts.items()) == len(user_all['body']['illusts'].items()):
@@ -135,6 +166,27 @@ def users(user_id):
             for page in range(math.ceil(len(illust_ids) / max_num_of_ids_per_page)):
                 illusts |= api.fetch_user_illusts(user_id, illust_ids[page * max_num_of_ids_per_page: page * max_num_of_ids_per_page + max_num_of_ids_per_page]).json()
             html += render_paged_illusts(list(illusts['body']['works'].items()), render_illusts_user)
+    return html
+
+@bottle.get('/en/users/<user_id:int>/bookmarks/artworks')
+def user_bookmarks(user_id):
+
+    p = int(bottle.request.params.get('p', default=1))
+    items_per_page = 48
+
+    user_top = api.fetch_user_top(user_id).json()
+    bookmarks = api.fetch_user_bookmarks(user_id, (p - 1) * items_per_page, items_per_page).json()
+
+    html = render_user_header(user_id, user_top)
+
+    max_p = math.ceil(bookmarks['body']['total'] / items_per_page)
+    html += render_pager(p, max_p)
+
+    illusts = bookmarks['body']['works']
+    html += render_illusts_general(illusts)
+
+    html += render_pager(p, max_p)
+
     return html
 
 @bottle.get('/user_banner/<user_id:int>')
