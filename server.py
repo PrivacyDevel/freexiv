@@ -2,11 +2,18 @@
 
 import urllib.parse
 import math
+import re
 
 import bottle
 
 import api
 import config
+
+# from https://s.pximg.net/www/js/build/spa.illust.43512305451e699294de.js
+emojis_raw = [(101,"normal"),(102,"surprise"),(103,"serious"),(104,"heaven"),(105,"happy"),(106,"excited"),(107,"sing"),(108,"cry"),(201,"normal2"),(202,"shame2"),(203,"love2"),(204,"interesting2"),(205,"blush2"),(206,"fire2"),(207,"angry2"),(208,"shine2"),(209,"panic2"),(301,"normal3"),(302,"satisfaction3"),(303,"surprise3"),(304,"smile3"),(305,"shock3"),(306,"gaze3"),(307,"wink3"),(308,"happy3"),(309,"excited3"),(310,"love3"),(401,"normal4"),(402,"surprise4"),(403,"serious4"),(404,"love4"),(405,"shine4"),(406,"sweat4"),(407,"shame4"),(408,"sleep4"),(501,"heart"),(502,"teardrop"),(503,"star")] 
+
+emojis = { emoji_name: emoji_id for emoji_id, emoji_name in emojis_raw }
+
 
 def render_header():
     html = '<style>details[open] > summary {display: none;}</style>'
@@ -77,7 +84,16 @@ def artworks(illust_id):
         img_split = urllib.parse.urlsplit(img)
         html += f"<div><a href='/en/users/{comment['userId']}'><img src='/{img_split.netloc}{img_split.path}'>{comment['userName']}</a>: "
         if len(comment['comment']) != 0:
-            html += f"{comment['comment']}"
+
+            def replacer(matchobj):
+                key = matchobj.group(1)
+                if key in emojis:
+                    return f'<img src="/s.pximg.net/common/images/emoji/{emojis[key]}.png">'
+                else:
+                    return key
+
+            comment = re.sub('\(([^)]+)\)', replacer, comment['comment'])
+            html += f"{comment}"
         else:
             html += f"<img src='/s.pximg.net/common/images/stamp/generated-stamps/{comment['stampId']}_s.jpg'>"
 
