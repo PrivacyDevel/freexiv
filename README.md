@@ -59,5 +59,6 @@ exit
 [Codeberg](https://codeberg.org/PrivacyDev/freexiv), [GitHub](https://github.com/PrivacyDevel/freexiv)
 
 ## Donations
-[Monero (XMR)](https://www.getmonero.org/): `83Ak3unX8ATdAQzWhKWzoDUUQRZX28NZN66r8CoEUEAZZsjxeEJxqfTdYjv6n7m7JkCGvHeKLQffQXNzobaJw4hEQw92rpP`
+[Monero (XMR)](https://www.getmonero.org/): `83Ak3unX8ATdAQzWhKWzoDUUQRZX28NZN66r8CoEUEAZZsjxeEJxqfTdYjv6n7m7JkCGvHeKLQffQXNzobaJw4hEQw92rpP` \
+[Bitcoin (BTC)](https://bitcoin.org/): `bc1qzmx0gemry0fgn8jcrwp9x00j7zs860hpjy3x9g`
 
