@@ -14,6 +14,7 @@ exit
 cp /home/freexiv/freexiv/nginx/freexiv /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-{available,enabled}/freexiv
 cp /home/freexiv/freexiv/freexiv.service /etc/systemd/system/
+chown root:root /etc/systemd/system/freexiv.service
 ```
 Adjust the following files as needed:
 - /home/freexiv/freexiv/config.py
