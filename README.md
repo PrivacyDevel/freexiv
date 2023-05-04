@@ -10,6 +10,7 @@ useradd -ms /bin/bash freexiv
 su - freexiv
 git clone https://codeberg.org/PrivacyDev/freexiv
 cp freexiv/config.py{.example,}
+chmod 600 freexiv/config.py
 exit
 cp /home/freexiv/freexiv/nginx/freexiv /etc/nginx/sites-available/
 ln -s /etc/nginx/sites-{available,enabled}/freexiv
