@@ -3,6 +3,7 @@
 import urllib.parse
 import math
 import re
+import html as htmllib
 
 import bottle
 
@@ -63,7 +64,7 @@ def render_user_header(user_id, user_top):
             html += f"<img src='/{image_split.netloc}{image_split.path}'>"
             break
 
-    html += f"{ogp['title']}<p>{ogp['description']}</p>"
+    html += htmllib.escape(ogp['title']) + '<p>' + htmllib.escape(ogp['description']) + '</p>'
     html += f'<ul><li><a href="/en/users/{user_id}">Home</a></li><li><a href="/en/users/{user_id}/bookmarks/artworks">Bookmarks</a></li></ul>'
     return html
 
@@ -113,9 +114,9 @@ def artworks(illust_id):
         html += f'<a href="/{original_url_split.netloc}{original_url_split.path}"><img src="/{regular_url_split.netloc}{regular_url_split.path}"></a>'
 
     illust = api.fetch_illust(illust_id).json()['body']
-    html += f"<h1>{illust['illustTitle']}</h1>"
+    html += '<h1>' + htmllib.escape(illust['illustTitle']) + '</h1>'
     html += f"<p>{illust['description']}</p>"
-    html += f"<a href='/en/users/{illust['userId']}'>{illust['userName']}</a>"
+    html += f"<a href='/en/users/{illust['userId']}'>" + htmllib.escape(illust['userName']) + '</a>'
     html += f"<h2>Comments</h2>"
 
     comments = api.fetch_comments(illust_id).json()
@@ -132,8 +133,9 @@ def artworks(illust_id):
                 else:
                     return key
 
-            comment = re.sub('\(([^)]+)\)', replacer, comment['comment'])
-            html += f"{comment}"
+            comment = htmllib.escape(comment['comment'])
+            comment = re.sub('\(([^)]+)\)', replacer, comment)
+            html += comment
         else:
             html += f"<img src='/s.pximg.net/common/images/stamp/generated-stamps/{comment['stampId']}_s.jpg'>"
 
