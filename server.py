@@ -107,21 +107,24 @@ def artworks_json(illust_id):
 
 @bottle.get('/<illust_id:int>-<page_num:int>.<ext:re:jpg|png>')
 @bottle.get('/<illust_id:int>.<ext:re:jpg|png>')
-def getimage(illust_id, page_num=-1, ext='jpg'):
+def getimage(illust_id, page_num=None, ext='jpg'):
     pages = api.fetch_illust_pages(illust_id).json()
     
     # Check if 'body' is not empty
     if 'body' in pages:
-        if page_num == -1:
-            original_url = pages['body'][0]['urls']['original']
-        elif 0 <= page_num < len(pages['body']):
-            original_url = pages['body'][page_num]['urls']['original']
-        else:
-            return bottle.HTTPError(404, "Page not found")
-        # Remove leading 'https://'
-        original_url = original_url.replace('https://', '')
-        
-    return bottle.redirect(f'/{original_url}')
+        if page_num is None:
+            page_num = 1 
+            
+        if 1 <= page_num <= len(pages['body']):
+            original_url = pages['body'][page_num - 1]['urls']['original']
+            
+            # Remove leading 'https://'
+            original_url = original_url.replace('https://', '')
+            
+            return bottle.redirect(f'/{original_url}')
+
+    # Handle the case when 'body' is empty
+    return bottle.HTTPError(404, "Illustration not found")
 
 @bottle.get('/artworks/<illust_id:int>')
 def artworks(illust_id):
