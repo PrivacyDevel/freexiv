@@ -51,6 +51,7 @@ exit
 |Instance                                                 | Cloudflare | Notes             |
 |---------------------------------------------------------|------------|-------------------|
 |[freexiv.privacydev.net](https://freexiv.privacydev.net) | No         | official instance |
+|[freexiv.iqbalrifai.eu.org](https://freexiv.iqbalrifai.eu.org) | Yes   | Indonesia or Multicast Instance |
 
 ### Tor
 |Instance                                                                                                                                                | Notes             |

@@ -26,7 +26,7 @@ def render_illusts_general(illusts):
     for illust in illusts:
         try:
             url = urllib.parse.urlsplit(illust['url'])
-            html += f"<a href='/en/artworks/{illust['id']}'><img src='/{url.netloc}{url.path}' loading='lazy' ></a>"
+            html += f"<a href='/artworks/{illust['id']}'><img src='/{url.netloc}{url.path}' loading='lazy' ></a>"
         except KeyError:
             pass
 
@@ -37,7 +37,7 @@ def render_illusts_user(illusts):
     for illust_id, illust in illusts:
         url = illust['url']
         url_split = urllib.parse.urlsplit(url)
-        html += f"<a href='/en/artworks/{illust_id}'><img src='/{url_split.netloc}{url_split.path}'></a>"
+        html += f"<a href='/artworks/{illust_id}'><img src='/{url_split.netloc}{url_split.path}'></a>"
     return html
 
 def render_paged_illusts(illusts, render_fun=render_illusts_general):
@@ -65,7 +65,7 @@ def render_user_header(user_id, user_top):
             break
 
     html += htmllib.escape(ogp['title']) + '<p>' + htmllib.escape(ogp['description']) + '</p>'
-    html += f'<ul><li><a href="/en/users/{user_id}">Home</a></li><li><a href="/en/users/{user_id}/bookmarks/artworks">Bookmarks</a></li></ul>'
+    html += f'<ul><li><a href="/users/{user_id}">Home</a></li><li><a href="/users/{user_id}/bookmarks/artworks">Bookmarks</a></li></ul>'
     return html
 
 def render_pager(p, max_p):
@@ -99,7 +99,34 @@ def landing():
     html += render_paged_illusts(landing_page['body']['thumbnails']['illust'])
     return html
 
-@bottle.get('/en/artworks/<illust_id:int>')
+@bottle.get('/<illust_id:int>.json')
+def artworks_json(illust_id): 
+    json = api.fetch_illust_pages(illust_id).json()
+    bottle.content_type = 'application/json'
+    return json
+
+@bottle.get('/<illust_id:int>-<page_num:int>.<ext:re:jpg|png>')
+@bottle.get('/<illust_id:int>.<ext:re:jpg|png>')
+def getimage(illust_id, page_num=None, ext='jpg'):
+    pages = api.fetch_illust_pages(illust_id).json()
+    
+    # Check if 'body' is not empty
+    if 'body' in pages:
+        if page_num is None:
+            page_num = 1 
+            
+        if 1 <= page_num <= len(pages['body']):
+            original_url = pages['body'][page_num - 1]['urls']['original']
+            
+            # Remove leading 'https://'
+            original_url = original_url.replace('https://', '')
+            
+            return bottle.redirect(f'/{original_url}')
+
+    # Handle the case when 'body' is empty
+    return bottle.HTTPError(404, "Illustration not found")
+
+@bottle.get('/artworks/<illust_id:int>')
 def artworks(illust_id):
     html = render_header()
     pages = api.fetch_illust_pages(illust_id).json()
@@ -116,14 +143,14 @@ def artworks(illust_id):
     illust = api.fetch_illust(illust_id).json()['body']
     html += '<h1>' + htmllib.escape(illust['illustTitle']) + '</h1>'
     html += f"<p>{illust['description']}</p>"
-    html += f"<a href='/en/users/{illust['userId']}'>" + htmllib.escape(illust['userName']) + '</a>'
+    html += f"<a href='/users/{illust['userId']}'>" + htmllib.escape(illust['userName']) + '</a>'
     html += f"<h2>Comments</h2>"
 
     comments = api.fetch_comments(illust_id).json()
     for comment in comments['body']['comments']:
         img = comment['img']
         img_split = urllib.parse.urlsplit(img)
-        html += f"<div><a href='/en/users/{comment['userId']}'><img src='/{img_split.netloc}{img_split.path}'>{comment['userName']}</a>: "
+        html += f"<div><a href='/users/{comment['userId']}'><img src='/{img_split.netloc}{img_split.path}'>{comment['userName']}</a>: "
         if len(comment['comment']) != 0:
 
             def replacer(matchobj):
@@ -148,7 +175,7 @@ def artworks(illust_id):
 
     return html
 
-@bottle.get('/en/users/<user_id:int>')
+@bottle.get('/users/<user_id:int>')
 def user(user_id):
 
     user_top = api.fetch_user_top(user_id).json()
@@ -170,7 +197,7 @@ def user(user_id):
             html += render_paged_illusts(list(illusts['body']['works'].items()), render_illusts_user)
     return html
 
-@bottle.get('/en/users/<user_id:int>/bookmarks/artworks')
+@bottle.get('/users/<user_id:int>/bookmarks/artworks')
 def user_bookmarks(user_id):
 
     p = int(bottle.request.params.get('p', default=1))
