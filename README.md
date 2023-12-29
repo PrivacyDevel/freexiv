@@ -33,6 +33,13 @@ systemctl reload nginx
 exit
 ```
 
+### Docker
+```
+cd freexiv
+docker build -t freexiv --build-arg SESSION_ID=YOUR_SESSION_ID .
+docker run -d --restart unless-stopped -p 8080:8080 --name freexiv freexiv
+```
+
 ## Update
 
 ```
